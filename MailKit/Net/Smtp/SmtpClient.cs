@@ -2249,6 +2249,8 @@ namespace MailKit.Net.Smtp {
 			}
 
 			if (doAsync) {
+				await Stream.FlushAsync (cancellationToken).ConfigureAwait (false);
+				await BeforeDataFinalizeAsync(cancellationToken).ConfigureAwait (false);
 				await Stream.WriteAsync (EndData, 0, EndData.Length, cancellationToken).ConfigureAwait (false);
 				await Stream.FlushAsync (cancellationToken).ConfigureAwait (false);
 
@@ -2269,6 +2271,15 @@ namespace MailKit.Net.Smtp {
 				OnMessageSent (new MessageSentEventArgs (message, response.Response));
 				return response.Response;
 			}
+		}
+
+		/// <summary>
+		/// Called immediately before end-of-data-stream message is sent.
+		/// </summary>
+		/// <param name="cancellationToken"></param>
+		protected virtual Task BeforeDataFinalizeAsync (CancellationToken cancellationToken)
+		{
+			return Task.FromResult(false);
 		}
 
 		async Task ResetAsync (bool doAsync, CancellationToken cancellationToken)
